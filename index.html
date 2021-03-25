@@ -6,7 +6,7 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.80.0">
-    <title>Dashboard Template · Bootstrap v5.0</title>
+    <title>RPIMS System</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/dashboard/">
 
@@ -236,7 +236,8 @@
                   </div>
                 </td>
                 <td>
-                  날짜표시
+                  <input type="date" name="" value="">
+                  ~<input type="date" name="" value="">
                 </td>
                 <td align = "right">
                   <label for="sangte">상태구분 :
@@ -284,9 +285,29 @@
           -->
         </div>
       </div>
+      <div class="" align="right">
+        <table>
+          <tr>
+            <td>
+              <button type="button" class="btn btn-sm btn-outline-secondary">엑샐</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary">출력</button>
+            </td>
+            <td>
+              <button type="button" class="btn btn-sm btn-outline-secondary">등록</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary">수정</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary">취소</button>
+            </td>
+            <td>
+              <button type="button" class="btn btn-sm btn-outline-secondary">저장</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary">삭제</button>
+            </td>
+          </tr>
+        </table>
+      </div>
 
+      <!--
       <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
-
+      -->
         <!-- 수주내역 -->
       <h2>수주내역</h2>
       <div class="table-responsive">
@@ -294,90 +315,44 @@
           <thead>
             <tr>
               <th>#</th>
-              <th>Header</th>
-              <th>Header</th>
-              <th>Header</th>
-              <th>Header</th>
-              <th>#</th>
-              <th>Header</th>
-              <th>Header</th>
-              <th>Header</th>
-              <th>Header</th>
-              <th>#</th>
-              <th>Header</th>
-              <th>Header</th>
-              <th>Header</th>
-              <th>Header</th>
+              <th>수주번호</th>
+              <th>도급구분</th>
+              <th>품목코드</th>
+              <th>품명</th>
+              <th>품번</th>
+              <th>재질</th>
+              <th>단위</th>
+              <th>수량</th>
+              <th>단가</th>
+              <th>금액</th>
+              <th>부가세</th>
+              <th>합계금액</th>
+              <th>비고</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>1,001</td>
-              <td>random</td>
-              <td>data</td>
-              <td>placeholder</td>
-              <td>text</td>
-              <td>1,001</td>
-              <td>random</td>
-              <td>data</td>
-              <td>placeholder</td>
-              <td>text</td>
-              <td>1,001</td>
-              <td>random</td>
-              <td>data</td>
-              <td>placeholder</td>
-              <td>text</td>
-            </tr>
-            <tr>
-              <td>1,002</td>
-              <td>placeholder</td>
-              <td>irrelevant</td>
-              <td>visual</td>
-              <td>layout</td>
-              <td>1,002</td>
-              <td>placeholder</td>
-              <td>irrelevant</td>
-              <td>visual</td>
-              <td>layout</td>
-              <td>1,002</td>
-              <td>placeholder</td>
-              <td>irrelevant</td>
-              <td>visual</td>
-              <td>layout</td>
-            </tr>
-            <tr>
-              <td>1,003</td>
-              <td>data</td>
-              <td>rich</td>
-              <td>dashboard</td>
-              <td>tabular</td>
-              <td>1,003</td>
-              <td>data</td>
-              <td>rich</td>
-              <td>dashboard</td>
-              <td>tabular</td>
-              <td>1,003</td>
-              <td>data</td>
-              <td>rich</td>
-              <td>dashboard</td>
-              <td>tabular</td>
-            </tr>
-            <tr>
-              <td>1,003</td>
-              <td>information</td>
-              <td>placeholder</td>
-              <td>illustrative</td>
-              <td>data</td>
-              <td>1,003</td>
-              <td>information</td>
-              <td>placeholder</td>
-              <td>illustrative</td>
-              <td>data</td>
-              <td>1,003</td>
-              <td>information</td>
-              <td>placeholder</td>
-              <td>illustrative</td>
-              <td>data</td>
+              <td><input type="checkbox"></td>
+              <td>21323-001</td>
+              <td>
+                <label for="sa"> 사급
+                  <input id="sa" type="radio" name="do_class">
+                </label>
+                <label for="do"> 도급
+                  <input id="do"type="radio" name="do_class">
+                </label>
+              </td>
+              <td>0004</td>
+              <td>동욱_강철막대기</td>
+              <td>20210323</td>
+              <td>SGAFC1180Y</td>
+              <td>KG</td>
+              <td>10</td>
+              <td>1,200.00</td>
+              <td>12,000</td>
+              <td>1,200</td>
+              <td>13,200</td>
+              <td></td>
             </tr>
           </tbody>
         </table>
