@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+
+<title>login</title>
+<script language="javascript">
+<!--
+function getSelectValue(frm)
+{
+ frm.textValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].text;
+ frm.optionValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].value;
+}
+function getSelectValue_Car(frm)
+{
+ frm.textValue.value = frm.Choice_AICar.options[frm.Choice_AICar.selectedIndex].text;
+ frm.optionValue.value = frm.Choice_AICar.options[frm.Choice_AICar.selectedIndex].value;
+}
+function getSelectValue_temp(frm)
+{
+ frm.textValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].text;
+ frm.optionValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].value;
+}
+function getSelectValue_Year(frm)
+{
+ frm.textValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].text;
+ frm.optionValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].value;
+}
+function getSelectValue_total(frm)
+{
+ frm.textValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].text;
+ frm.optionValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].value;
+}
+function getSelectValue_Goal(frm)
+{
+ frm.textValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].text;
+ frm.optionValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].value;
+}
+function getSelectValue_OnP(frm)
+{
+ frm.textValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].text;
+ frm.optionValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].value;
+}
+function getSelectValue_DrivePatan(frm)
+{
+ frm.textValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].text;
+ frm.optionValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].value;
+}
+function getSelectValue_Speeds(frm)
+{
+ frm.textValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].text;
+ frm.optionValue.value = frm.selectBox.options[frm.selectBox.selectedIndex].value;
+}
+//-->
+</script>
+<style type="text/css">
+body {
+	padding-top: 60px;
+	padding-bottom: 40px;
+}
+
+.sidebar-nav {
+	padding: 9px 0;
+}
+
+@media ( max-width : 980px) {
+	/* Enable use of floated navbar text */
+	.navbar-text.pull-right {
+		float: none;
+		padding-left: 5px;
+		padding-right: 5px;
+	}
+}
+
+.form-signin {
+	max-width: 50px;
+	padding: 19px 29px 29px;
+	margin: 0 auto 20px;
+	background-color: #fff;
+	border: 1px solid #e5e5e5;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+	-moz-box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+}
+
+.form-signin .form-signin-heading, .form-signin .checkbox {
+	margin-bottom: 10px;
+}
+
+.form-signin input[type="text"], .form-signin input[type="password"] {
+	font-size: 16px;
+	height: auto;
+	margin-bottom: 15px;
+	padding: 7px 9px;
+}
+</style>
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+<!-- Fav and touch icons -->
+<link rel="apple-touch-icon-precomposed" sizes="144x144"
+	href="bootstrap/ico/apple-touch-icon-144-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="114x114"
+	href="bootstrap/ico/apple-touch-icon-114-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="72x72"
+	href="bootstrap/ico/apple-touch-icon-72-precomposed.png">
+<link rel="apple-touch-icon-precomposed"
+	href="bootstrap/ico/apple-touch-icon-57-precomposed.png">
+<link rel="shortcut icon" href="bootstrap/ico/favicon.png">
+</head>
+<?php
+session_start();
+?>
+<body>
+	<div class="container">
+
+		<div class="masthead">
+			<img src="bootstrap/img/logo_n3.png"><br>
+			<div class="navbar">
+				<div class="navbar-inner">
+					<div class="container">
+						<ul class="nav">
+							<li><a href="index.html">Home</a></li>
+							<li><a href="info.html">MyInfo</a></li>
+							<li><a href="Services.html">Charge forecast</a></li>
+							<li><a href="download.html">Downloads</a></li>
+							<li><a href="#">About</a></li>
+							<li><a href="#">Contact</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<!-- /.navbar -->
+		</div>
+		<div class="row">
+			<div class="span9">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>항목</th>
+							<th>선택</th>
+							<th>항목</th>
+							<th>선택</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th>차종선택</th>
+							<th>
+								<form name="form">
+								<select name="Choice_AICar" onChange="getSelectValue_Car(this.form);">
+			    			<option value="">차종선택</option>
+								<?php
+								$conn = mysqli_connect("222.96.135.240", "root", "1234", "test");
+								$s_sql = "SELECT car_nm FROM my_cars;";
+								$result = mysqli_query($conn, $s_sql);								
+								while($row = mysqli_fetch_array($result)){
+									?>
+									<option value= $j > <?php print_r($row["car_nm"]); ?> </option>
+									<?php
+								}
+								?>
+								</select><br><br>
+								텍스트값: <input type="text" name="textValue">&nbsp;&nbsp;옵션값: <input type="text" name="optionValue">
+								</form>
+							</th>
+							<th>기온선택</th>
+							<th>
+								<form class="" action="Services.php" method="post">
+								<select name="Choice_AITempp" onChange="getSelectValue(this.form);">
+				    			<option value="">기온선택</option>
+									<?php
+									for($i = 40; $i >= -16; $i = $i - 2){
+										?>
+										<option value= ""> <?php print_r($i); print_r("℃"); ?> </option>
+										<?php
+									}
+									?>
+								</select><br><br>
+								</form>
+							</th>
+						</tr>
+						<tr>
+							<th>연식선택</th>
+							<th>
+								<form class="" action="Services.php" method="post">
+								<select name="Choice_AIYears" onChange="getSelectValue(this.form);">
+			    				<option value="1">연식선택</option>
+			    				<option value="2">1년</option>
+			    				<option value="3">2년</option>
+			    				<option value="4">3년</option>
+									<option value="5">4년</option>
+			    				<option value="6">5년</option>
+			    				<option value="7">6년</option>
+								</select><br><br>
+								</form>
+							</th>
+							<th>총주행거리</th>
+							<th>
+								<select name="Choice_AITempp">
+				    			<option value="">총주행거리</option>
+				    			<option value="">5000km</option>
+									<option value="">10000km</option>
+									<option value="">15000km</option>
+									<option value="">20000km</option>
+									<option value="">25000km</option>
+									<option value="">30000km</option>
+								</select>
+							</th>
+						</tr>
+						<tr>
+							<th>목표거리선택</th>
+							<th>
+								<select name="Choice_AITempp">
+				    			<option value="">목표거리</option>
+									<?php
+									for($i = 5; $i <= 25; $i = $i + 2.5){
+										?>
+										<option value= ""> <?php print_r($i); print_r('km'); ?> </option>
+										<?php
+									}
+									?>
+								</select>
+							</th>
+							<th>추가중량선택</th>
+							<th>
+								<select name="Choice_AITempp">
+				    			<option value="">탑승인원</option>
+				    			<option value="">1명</option>
+				    			<option value="">2명</option>
+				    			<option value="">3명</option>
+									<option value="">4명</option>
+				    			<option value="">5명</option>
+								</select>
+							</th>
+						</tr>
+						<tr>
+							<th>주행패턴선택</th>
+							<th>
+								<select name="Choice_AITempp">
+				    			<option value="">운전패턴</option>
+				    			<option value="">도심</option>
+				    			<option value="">복합</option>
+				    			<option value="">고속도로</option>
+								</select>
+							</th>
+							<th>평균속도선택</th>
+							<th>
+								<select name="Choice_AITempp">
+				    			<option value="">주행속도</option>
+									<?php
+									for($i = 50; $i <= 90; $i = $i + 10){
+										?>
+										<option value= ""> <?php print_r($i); print_r('km/h'); ?> </option>
+										<?php
+									}
+									?>
+								</select>
+							</th>
+						</tr>
+					</tbody>
+
+				</table>
+				<form method='post' action='AI_charging.php'>
+					<h2 class="form-signin-heading">인공지능</h2>
+					<p></p><br><br>
+					텍스트값: <input type="text" name="textValue">&nbsp;&nbsp;옵션값: <input type="text" name="optionValue">
+				</form>
+					<form name="form">
+					<select name="selectBox" onChange="getSelectValue(this.form);">
+					 <option value="option1">웹마당넷1</option>
+					 <option value="option2">웹마당넷2</option>
+					 <option value="option3">웹마당넷3</option>
+					 <option value="option4">웹마당넷4</option>
+					</select><br><br>
+					텍스트값: <input type="text" name="textValue">&nbsp;&nbsp;옵션값: <input type="text" name="optionValue">
+					</form>
+
+
+					<button class="btn btn-large btn-primary" type="submit"
+						tabindex='3'>충전량 예측</button>
+						<?php
+	if(isset($_SESSION['AIs'])) {
+	$Charge_AI = $_SESSION['AIs'];
+	echo "예측된 충전량은" .  $Charge_AI . " 입니다.";
+	}
+	?>
+			</div>
+			<?php
+			$_SESSION['AIs'] = null;
+			?>
+			<div class="span3">
+				<?php
+if(!isset($_SESSION['U_nm'])) {
+?>
+				<form method='post' action='login2_ok.php'>
+					<h2 class="form-signin-heading">Please sign in</h2>
+					<input type="text" name='user_id' tabindex='1'
+						class="input-block-level" placeholder="Email address"> <input
+						type="password" name='user_pw' tabindex='2'
+						class="input-block-level" placeholder="Password">
+					<button class="btn btn-large btn-primary" type="submit"
+						tabindex='3'>Sign in</button>
+				</form>
+				<h4 class="form-signin-heading">아직 회원이 아니신가요?</h4>
+				<form method='post' action='login2.php'>
+					<button class="btn btn-large btn-primary" type="submit"
+						tabindex='4'>회원가입</button>
+				</form>
+			</div>
+
+					<!-- /container -->
+					<?php
+					}
+					?>
+
+					<?php
+					if(isset($_SESSION['U_nm'])) {$user_id2 = $_SESSION['U_nm'];echo "안녕하세요." .  $user_id2 . " 님";
+					?>
+					<form method='post' action='logout.php'>
+						<button class="btn btn-large btn-primary" type="submit"
+							tabindex='4'>로그아웃</button>
+					</form>
+					<?php
+					}
+					?>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+
+
+
+	<script src="bootstrap/js/jquery.js"></script>
+	<script src="bootstrap/js/bootstrap-transition.js"></script>
+	<script src="bootstrap/js/bootstrap-alert.js"></script>
+	<script src="bootstrap/js/bootstrap-modal.js"></script>
+	<script src="bootstrap/js/bootstrap-dropdown.js"></script>
+	<script src="bootstrap/js/bootstrap-scrollspy.js"></script>
+	<script src="bootstrap/js/bootstrap-tab.js"></script>
+	<script src="bootstrap/js/bootstrap-tooltip.js"></script>
+	<script src="bootstrap/js/bootstrap-popover.js"></script>
+	<script src="bootstrap/js/bootstrap-button.js"></script>
+	<script src="bootstrap/js/bootstrap-collapse.js"></script>
+	<script src="bootstrap/js/bootstrap-carousel.js"></script>
+	<script src="bootstrap/js/bootstrap-typeahead.js"></script>
+</body>
+</html>

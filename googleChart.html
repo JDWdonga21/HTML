@@ -1,0 +1,87 @@
+<html>
+<?php
+  session_start();
+?>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Insert title here</title>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+</head>
+<body>
+	<form form class="" method='post'>
+			<div class="col-md-5 service-item">
+				<label for="Sel_DV2">기기선택 :</label>
+				<select id="Sel_DV2" name="Sel_DV2">
+					<?php
+					$conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+					$s_sql = "SELECT D_Code, DV_name FROM my_device where Add_DV = '1';";
+					$result = mysqli_query($conn, $s_sql);
+					while($row = mysqli_fetch_array($result)){
+					?>
+					<option value= <?php print_r($row["D_Code"]); ?> ><?php print_r($row["D_Code"]); ?> : <?php print_r($row["DV_name"]); ?> </option>
+					<?php
+					}
+					?>
+				</select>
+		</div>
+		<div class="col-md-5 service-item">
+			<label for="Sel_date2">날짜/시간 :</label>
+			<input type="date"  name="Sel_date2" value="2020-04-17">
+			<label for="times">시간 :</label>
+			<input id="times" name="times" type="number" value="17" min="00" max="23" name="Sel_date" value="time">
+		</div>
+		<div class="col-md-2 service-item">
+			<button class="btn btn-large btn-primary" type="submit"
+				>값 조회</button>
+		</div>
+	</form>
+		<?php
+			if(isset($_POST['Sel_DV2'])) {
+			$test_phparr = array();
+			array_push($test_phparr, ['Time', 'Voltage', 'Current', 'SOC']);
+
+			$conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+			$s_sql2 = "SELECT * FROM my_main where D_Code = ".$_POST['Sel_DV2']." and date_format(Cal_Date, '%Y') = ".substr($_POST['Sel_date2'], 0, 4)." and date_format(Cal_Date, '%m') = ".substr($_POST['Sel_date2'], 5, 2)." and date_format(Cal_Date, '%d') = ".substr($_POST['Sel_date2'], 8, 2)." and date_format(Cal_Date, '%H') = ".$_POST['times'].";";
+			$result = mysqli_query($conn, $s_sql2);
+			$check = mysqli_fetch_array($result);
+			if($check[0]!=""){
+				while($row = mysqli_fetch_array($result)){
+					$test_phparrsub = array();
+					array_push($test_phparrsub, 1);
+					array_push($test_phparrsub, " ".(int)$row["SOC"]);
+					array_push($test_phparrsub, " ".(int)$row["SOC"]);
+					array_push($test_phparrsub, " ".(int)$row["SOC"]);
+					array_push($test_phparr, $test_phparrsub);
+				}
+				$ru = json_encode($test_phparr);
+			}
+			else{
+				echo "기기코드 - ".$_POST['Sel_DV2']." ".$_POST['Sel_date2']." ".$_POST['times']."시에 전송된 값 없음";
+				}
+			}
+			?>
+	<script type="text/javascript">
+		var test_new = new Array('<?php echo $ru; ?>');
+		//test_new ='<?php echo $ru; ?>';
+		google.charts.load('current', {'packages':['corechart']});
+		google.charts.setOnLoadCallback(drawVisualization);
+		alert(test_new);
+		alert(typeof test_new);
+		function drawVisualization() {
+			var data = google.visualization.arrayToDataTable(test_new);
+			var options = {
+					title : '데이터뷰 차트',
+					vAxis: {title: 'Voltage'},
+					hAxis: {title: 'Time'},
+					seriesType: 'bars',
+					series: {2: {type: 'line'}}
+				};
+
+			var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
+			chart.draw(data, options);
+		}
+	</script>
+	<div id="chart_div" style="width:1200px; height: 500px;"></div>
+</body>
+</html>

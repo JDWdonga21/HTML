@@ -1,37 +1,1915 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
+<?php
+  session_start();
+?>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-        .a {
-            display: flex;
-            width: 100%;
-        }
-        .b {
-            width: 40%
-        }
+  <meta charset="utf-8">
+  <title>정안 센서모니터링</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="" name="keywords">
+  <meta content="" name="description">
+
+  <!-- Facebook Opengraph integration: https://developers.facebook.com/docs/sharing/opengraph -->
+  <meta property="og:title" content="">
+  <meta property="og:image" content="">
+  <meta property="og:url" content="">
+  <meta property="og:site_name" content="">
+  <meta property="og:description" content="">
+
+  <!-- Twitter Cards integration: https://dev.twitter.com/cards/  -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="">
+  <meta name="twitter:title" content="">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="">
+
+  <!-- Place your favicon.ico and apple-touch-icon.png in the template root directory -->
+  <link href="favicon.ico" rel="shortcut icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i|Raleway:300,400,500,700,800" rel="stylesheet">
+
+  <!-- Bootstrap CSS File -->
+  <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Libraries CSS Files -->
+  <link href="lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+  <link href="lib/animate-css/animate.min.css" rel="stylesheet">
+
+  <!-- Main Stylesheet File -->
+  <link href="css/style.css" rel="stylesheet">
+
+  <!-- =======================================================
+    Theme Name: Imperial
+    Theme URL: https://bootstrapmade.com/imperial-free-onepage-bootstrap-theme/
+    Author: BootstrapMade.com
+    Author URL: https://bootstrapmade.com
+  ======================================================= -->
+  <style>
+        /* UI Object 가로 */
+        .h_graph ul{margin:0 50px 0 50px;padding:1px 0 0 0;border:1px solid #ddd;border-top:0;border-right:0;font-size:11px;font-family:Tahoma, Geneva, sans-serif;list-style:none}
+        .h_graph li{position:relative;margin:10px 0;vertical-align:top;white-space:nowrap}
+        .h_graph .g_term{position:absolute;top:0;left:-50px;width:40px;font-weight:bold;color:#767676;line-height:10px;text-align:right}
+        .h_graph .g_bar{display:inline-block;position:relative;height:15px;border:1px solid #ccc;border-left:0;background:#01D540}
+        .h_graph .g_bar span{position:absolute;top:0;right:-50px;width:40px;color:#767676;line-height:15px}
+        .h_graph .g_bar2{display:inline-block;position:relative;height:15px;border:1px solid #ccc;border-left:0;background:#0C0CE0}
+        .h_graph .g_bar2 span{position:absolute;top:0;right:-50px;width:40px;color:#567676;line-height:15px}
+        /* //UI Object */
+
+        /* UI Object 세로 */
+        .ratio{padding-top:20px}
+        .ratio li{float:left;position:relative;width:20px;height:300px;margin-right:10px;list-style:none}
+        .ratio div{position:absolute;left:0;bottom:0;width:100%;background:url(img/chartbar.png) repeat;font-size:0}
+        .ratio em{position:absolute;top:-20px;width:100%;font-size:12px;font-weight:bold;text-align:center}
+        /* //UI Object */
+        .pie-chart {
+            position: relative;
+            display:inline-block;
+            width: 300px;
+            height: 300px;
+            border-radius: 80%;
+            transition: 0.3s;
+          }
+          span.center{
+            background: #fff;
+            display : block;
+            position: absolute;
+            top:50%; left:50%;
+            width:200px; height:200px;
+            border-radius: 50%;
+            text-align:center; line-height: 200px;
+            font-size:30px;
+             transform: translate(-50%, -50%);
+          }
+
+      #chartcanvas{
+        margin-top: 0px;
+        margin-left: 20px;
+        margin-right: 0;
+        margin-bottom: 0px;
+        border: 1px solid red;
+        padding: 0;
+      }
     </style>
+    <script type="text/javascript">
+      function XY_Chart(x, y){
+        var canvas = document.getElementById("chartcanvas");
+        var context = canvas.getContext("2d");
+        var sw = canvas.width;
+        var sh = canvas.height;
+        var PADDING=100;
+
+        //데이터 입력 순
+        var data = [x, y];
+
+        //데이터 별 색상
+        var colors = ["#7cfc00", "#0000ff"];
+
+        var center_X=sw/2;
+        var center_Y=sh/2;
+
+        //두 계산값 중 작은 값은 값을 원의 반지름으로 설정
+        var radius = Math.min(sw-(PADDING*2), sh-(PADDING*2))/2;
+        var angle = 0;
+        var total = 0;
+        for(var i in data){
+          total+=data[i];
+        } //데이터(data)의 총합 계산
+
+        for(var i = 0; i< data.length; i++){
+          context.fillStyle = colors[i]; //생성되는 부분의 채울 색 설정
+          context.beginPath();
+            context.moveTo(center_X, center_Y); //원의 중심으로 이동
+            context.arc(center_X, center_Y, radius, angle, angle + (Math.PI*2*(data[i]/total)));
+          context.lineTo(center_X, center_Y);
+            context.fill();
+            angle += Math.PI*2*(data[i]/total);
+        }
+        // title 나타내기
+        var strMessage = "SOC";
+        context.textAlign = "center";
+        context.font = "14pt Century Gothic";
+        context.fillText(strMessage, sw/2,30);
+
+        // 브라우저 이름 및 점유율 나타내기
+        AddBrowserText(context, "SOC", x+" %", colors[0],140, 270);
+
+        function AddBrowserText(context, strBrowser, strRate, colors, text_xcoord, text_ycoord){
+          context.textAlign="left";
+          context.fillStyle= colors;
+          context.font = "12pt Century Gothic";
+          context.fillText(strBrowser, text_xcoord, text_ycoord);
+          context.fillText(strRate, text_xcoord, text_ycoord+20);
+        }
+      }
+    </script>
 </head>
 <body>
-    <div class="a">
-        <div class="b">
+  <?php
+    $AI_sw = '0';
+  ?>
+  <div id="preloader"></div>
 
-            <a href="F1.html">
-                <h3>No.1 공장</h3>
-                <img src="res/1.png" alt="" style="width: 500px; height: 500px;">
-            </a>
+  <!--==========================
+  Hero Section
+  ============================-->
+  <section id="hero">
+    <div class="hero-container">
+      <div class="wow fadeIn">
+        <div class="hero-logo">
+          <img class="" src="img/logo.gif" alt="Imperial">
         </div>
-        
-        <div class="b">
 
-            <a href="F2.html">
-                <h3>No.2 공장</h3>
-                <img src="res/2.png" alt="" style="width: 500px; height: 500px;">
-            </a>
+        <h1>정안철강 센서모니터링</h1>
+        <h2>본 시스템은 <span class="rotating">충전기 상태조회, 효율적인 충전량 예측, 관리기능 제공</span></h2>
+        <div class="actions">
+          <a href="#about" class="btn-get-started">1</a>
+          <a href="#services" class="btn-services">2</a>
         </div>
+      </div>
     </div>
+  </section>
+
+  <!--==========================
+  Header Section
+  ============================-->
+  <header id="header">
+    <div class="container">
+
+      <div id="logo" class="pull-left">
+        <a href="#hero"><img src="img/logo.png" alt="" title="" /></img></a>
+        <!-- Uncomment below if you prefer to use a text image -->
+        <!--<h1><a href="#hero">Header 1</a></h1>-->
+      </div>
+
+      <nav id="nav-menu-container">
+        <ul class="nav-menu">
+          <li class="menu-active"><a href="#hero">Home</a></li>
+          <li class="menu-has-children"><a href="">AI 학습 및 충전량예측</a>
+            <ul>
+              <li><a href="#about">충전량 예측</a></li>
+              <li><a href="#AI_l">AI학습</a></li>
+              <li><a href="#AI_S">인식률 & ROC</a></li>
+            </ul>
+          </li>
+          <li><a href="#services">기기상태조회</a></li>
+          <li><a href="#portfolio">데이터뷰</a></li>
+          <li><a href="#testimonials">관리자 패널</a></li>
+        </ul>
+      </nav>
+      <!-- #nav-menu-container -->
+    </div>
+  </header>
+  <!-- #header -->
+
+  <!--==========================
+  About Section
+  ============================-->
+  <section id="about">
+    <div class="container wow fadeInUp">
+      <div class="row">
+        <div class="col-md-12">
+          <h3 class="section-title">충전량 예측</h3>
+          <div class="section-title-divider"></div>
+          <p class="section-description">효율적 충전서비스를 위한 충전량 예측 </p>
+        </div>
+      </div>
+    </div>
+    <div class="container about-container wow fadeInUp">
+      <div class="row">
+
+        <div class="col-lg-6 about-img">
+          <img src="img/about-img.jpg" alt="">
+        </div>
+
+        <div class="col-md-6 about-content">
+          <h2 class="about-title">차종 외 7 개 값 입력</h2>
+          <form form class="" method='post' action='AI_charging.php'>
+          <label for="cars">차종 :</label>
+            <select id="cars" name="cars">
+                        <?php
+                        $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+                        $s_sql = "SELECT car_nm, effici  FROM my_cars;";
+                        $result = mysqli_query($conn, $s_sql);
+                        $j = 0;
+                        while($row = mysqli_fetch_array($result)){
+                          ?>
+                          <option value= <?php print_r($row["effici"]); ?> > <?php print_r($row["car_nm"]); ?> </option>
+                          <?php
+                        }
+                        ?>
+              </select><br><br>
+            <label for="tempp">기온 :</label>
+              <select id="tempp" name="tempp">
+                <?php
+                for($i = 40; $i >= -16; $i = $i - 2){
+                  $j = 0;
+                  if($i >= 10){
+                    $j = ($i/2)-4;
+                  }
+                  else{
+                    $j = ($i/2)-6;
+                    if($j < 0){
+                      $j = -$j;
+                    }
+                  }
+                  ?>
+                  <option value= <?php print_r($j); ?> > <?php print_r($i); print_r("℃"); ?> </option>
+                  <?php
+                }
+                ?>
+              </select><br><br>
+            <label for="Years">연식 :</label>
+              <select id="Years" name="Years">
+                <option value="1">1년</option>
+                <option value="2">2년</option>
+                <option value="3">3년</option>
+                <option value="4">4년</option>
+                <option value="5">5년</option>
+                <option value="6">6년</option>
+              </select><br><br>
+            <label for="Distance">총주행거리 :</label>
+              <select id="Distance" name="Distance">
+                <option value="1">5000km</option>
+                <option value="2">10000km</option>
+                <option value="3">15000km</option>
+                <option value="4">20000km</option>
+                <option value="5">25000km</option>
+                <option value="6">30000km</option>
+              </select><br><br>
+            <label for="ISGoals">목표거리 :</label>
+              <select id="ISGoals" name="ISGoals">
+                <option value="1">5 km</option>
+                <option value="2">7.5 km</option>
+                <option value="3">10 km</option>
+                <option value="4">12.5 km</option>
+                <option value="5">15 km</option>
+                <option value="6">17.5 km</option>
+                <option value="7">20 km</option>
+                <option value="8">22.5 km</option>
+                <option value="9">25 km</option>
+              </select><br><br>
+            <label for="OnTheP">추가중량 :</label>
+              <select id="OnTheP" name="OnTheP">
+                <option value="1">1명</option>
+                <option value="2">2명</option>
+                <option value="3">3명</option>
+                <option value="4">4명</option>
+                <option value="5">5명</option>
+              </select><br><br>
+            <label for="DrivePatan">주행패턴 :</label>
+              <select id="DrivePatan" name="DrivePatan">
+                <option value="1">도심</option>
+                <option value="2">복합</option>
+                <option value="3">고속도로</option>
+              </select><br><br>
+            <label for="AV_Speed">평균속도 :</label>
+              <select id="AV_Speed" name="AV_Speed">
+                <?php
+                $j = 1;
+                for($i = 50; $i <= 90; $i = $i + 10){
+                  ?>
+                  <option value= <?php print_r($j); ?>> <?php print_r($i); print_r('km/h'); ?> </option>
+                  <?php
+                  $j++;
+                }
+                ?>
+              </select><br><br>
+              <button class="btn btn-large btn-primary" type="submit"
+                >충전량 예측</button>
+            </form>
+                <br><br>
+          <h2 class="about-title">예측결과값</h2>
+            <?php
+            if(isset($_SESSION['AIs'])) {
+              if($_SESSION['AIs']==0){
+                $Charge_AI = "1 kWh";
+              }
+              else if($_SESSION['AIs']==1){
+                $Charge_AI = "1.5 kWh";
+              }
+              else if($_SESSION['AIs']==2){
+                $Charge_AI = "2 kWh";
+              }
+              else if($_SESSION['AIs']==3){
+                $Charge_AI = "2.5 kWh";
+              }
+              else if($_SESSION['AIs']==4){
+                $Charge_AI = "3 kWh";
+              }
+              else if($_SESSION['AIs']==5){
+                $Charge_AI = "3.5 kWh";
+              }
+              else if($_SESSION['AIs']==6){
+                $Charge_AI = "4 kWh";
+              }
+              else if($_SESSION['AIs']==7){
+                $Charge_AI = "4.5 kWh";
+              }
+              else{
+                $Charge_AI = "5 kWh";
+              }
+
+
+            echo "예측된 충전량은 " .  $Charge_AI . " 입니다.";
+            }
+            ?>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!--==========================
+  AI 학습
+  ============================-->
+  <section id="AI_l">
+    <div class="container wow fadeInUp">
+      <div class="row">
+        <div class="col-md-12">
+          <h3 class="section-title">AI 학습</h3>
+          <div class="section-title-divider"></div>
+          <p class="section-description">충전량 예측을 위한 AI학습 </p>
+        </div>
+      </div>
+    </div>
+    <div class="container AI_l-container wow fadeInUp">
+      <div class="row">
+        <div class="col-lg-6 AI_l-img">
+          <img src="img/about-img2.jpg" alt="">
+        </div>
+
+        <div class="col-md-6 AI_l-content">
+          <form form class="" method='post' action='AI_learning.php'>
+            <label for="learn1">1번층 활성함수</label>
+            <select class="" name="learn1">
+              <option value="relu">relu</option>
+              <option value="elu">elu</option>
+              <option value="selu">selu</option>
+              <option value="tanh">tanh</option>
+              <option value="LeakyReLU">LeakyReLU</option>
+              <option value="exponential">exponential</option>
+            </select>
+            <label for="Drop1">드롭아웃 :</label>
+            <input id="Drop" name="Drop1" type="number" value="25" min="00" max="100" name="Sel_date" value="time">
+            <br><br>
+            <label for="learn2">2번층 활성함수</label>
+            <select class="" name="learn2">
+              <option value="relu">relu</option>
+              <option value="elu">elu</option>
+              <option value="selu">selu</option>
+              <option value="tanh">tanh</option>
+              <option value="LeakyReLU">LeakyReLU</option>
+              <option value="exponential">exponential</option>
+            </select>
+            <label for="Drop2">드롭아웃 :</label>
+            <input id="Drop" name="Drop2" type="number" value="25" min="00" max="100" name="Sel_date" value="time">
+            <br><br>
+            <label for="learn3">3번층 활성함수</label>
+            <select class="" name="learn3">
+              <option value="relu">relu</option>
+              <option value="elu">elu</option>
+              <option value="selu">selu</option>
+              <option value="tanh">tanh</option>
+              <option value="LeakyReLU">LeakyReLU</option>
+              <option value="exponential">exponential</option>
+            </select>
+            <label for="Drop3">드롭아웃 :</label>
+            <input id="times" name="Drop3" type="number" value="25" min="00" max="100" name="Sel_date" value="time">
+            <br><br>
+            <label for="learnL">마지막 활성함수</label>
+            <select class="" name="learnL">
+              <option value="softmax">softmax</option>
+              <option value="sigmoid">sigmoid</option>
+              <option value="hard_sigmoid">hard_sigmoid</option>
+            </select>
+            <br><br>
+            <label for="Loss">손실함수</label>
+            <select class="Loss" name="Loss">
+              <option value="categorical_crossentropy">categorical_crossentropy</option>
+              <option value="mean_squared_error">mean_squared_error</option>
+              <option value="mean_absolute_error">mean_absolute_error</option>
+              <option value="mean_absolute_percentage_error">mean_absolute_percentage_error</option>
+              <option value="mean_squared_logarithmic_error">mean_squared_logarithmic_error</option>
+              <option value="squared_hinge">squared_hinge</option>
+              <option value="hinge">hinge</option>
+              <option value="categorical_hinge">categorical_hinge</option>
+              <option value="logcosh">logcosh</option>
+              <option value="sparse_categorical_crossentropy">sparse_categorical_crossentropy</option>
+              <option value="binary_crossentropy">binary_crossentropy</option>
+              <option value="kullback_leibler_divergence">kullback_leibler_divergence</option>
+              <option value="poisson">poisson</option>
+              <option value="cosine_proximity">cosine_proximity</option>
+            </select>
+            <br><br>
+            <label for="Metrics">측정항목</label>
+            <select class="" name="Metrics">
+              <option value="accuracy">accuracy</option>
+              <option value="binary_accuracy">binary_accuracy</option>
+              <option value="categorical_accuracy">categorical_accuracy</option>
+              <option value="sparse_categorical_accuracy">sparse_categorical_accuracy</option>
+              <option value="top_k_categorical_accuracy">top_k_categorical_accuracy</option>
+              <option value="sparse_top_k_categorical_accuracy">sparse_top_k_categorical_accuracy</option>
+            </select>
+            <br><br>
+            <label for="optimizer">옵티마이저</label>
+            <select class="" name="optimizer">
+              <option value="adam">adam</option>
+              <option value="SGD">SGD</option>
+              <option value="RMSprop">RMSprop</option>
+              <option value="adagrad">adagrad</option>
+              <option value="adadelta">adadelta</option>
+              <option value="adamax">adamax</option>
+              <option value="nadam">nadam</option>
+            </select>
+            <br><br>
+            <label for="Callbacks">Callbacks</label>
+            <select class="" name="Callbacks">
+              <option value="0">early_stopping</option>
+              <option value="1">BaseLogger</option>
+              <option value="2">TerminateOnNan</option>
+              <option value="3">ProgbarLogger</option>
+              <option value="4">History</option>
+            </select>
+            <br>
+            <p class="section-description">학습 실행 후 잠시만기다려 주세요.</p>
+            <br>
+              <button class="btn btn-large btn-primary" type="submit"
+                >AI 학습</button>
+          </form>
+          <br>
+          <h2 class="about-title">학습 인식률</h2>
+
+            <?php
+            if(isset($_SESSION['Learning_R'])) {
+
+            echo "학습 결과값은 " .  $_SESSION['Learning_R'] . " 입니다.";
+            }
+            ?>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!--==========================
+  AI 인식률
+  ============================-->
+  <section id="AI_S">
+    <div class="container wow fadeInUp">
+      <div class="row">
+        <div class="col-md-12">
+          <h3 class="section-title">AI 인식률</h3>
+          <div class="section-title-divider"></div>
+          <p class="section-description">충전량 예측 이력과 정확도</p>
+        </div>
+      </div>
+    </div>
+    <div class="container AI_S-container wow fadeInUp">
+      <div class="row">
+
+        <div class="col-lg-6 AI_S-img">
+          <img src="img/about-img2.jpg" alt="">
+        </div>
+
+        <div class="col-md-6 AI_S-content">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>idx</th>
+                <th>예측된 값</th>
+                <th>검증</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?PHP
+              $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+
+              $AI_sql2 = "SELECT COUNT(*) AS cnt FROM ai_roc;";
+              $result = mysqli_query($conn, $AI_sql2);
+              while($row = mysqli_fetch_array($result)){
+                $AI_Count = $row["cnt"]-20;
+              }
+              $AI_sql = "SELECT * FROM ai_roc where idx >= ".$AI_Count.";";
+              $result2 = mysqli_query($conn, $AI_sql);
+              while($row = mysqli_fetch_array($result2)){
+              ?>
+              <tr>
+                <th><?php echo $row["idx"]; ?></th>
+                <th>
+                  <?php
+                    $row["AI_kws"];
+                    if ($row["AI_kws"] == "0")
+                    {
+                       echo "1 kWh";
+                    }
+                    else if ($row["AI_kws"] == "1")
+                    {
+                      echo "1.5 kWh";
+                    }
+                    else if ($row["AI_kws"] == "2")
+                    {
+                      echo "2 kWh";
+                    }
+                    else if ($row["AI_kws"] == "3")
+                    {
+                      echo "2.5 kWh";
+                    }
+                    else if ($row["AI_kws"] == "4")
+                    {
+                      echo "3 kWh";
+                    }
+                    else if ($row["AI_kws"] == "5")
+                    {
+                      echo "3.5 kWh";
+                    }
+                    else if ($row["AI_kws"] == "6")
+                    {
+                      echo "4 kWh";
+                    }
+                    else if ($row["AI_kws"] == "7")
+                    {
+                      echo "4.5 kWh";
+                    }
+                    else
+                    {
+                      echo "5 kWh";
+                    }
+                  ?>
+                </th>
+                <th>
+                  <?php
+                    if($row["AI_test"] == "0"){
+                      echo "정확한 예측";
+                    }
+                    else{
+                      echo "부정확한 예측";
+                    }
+                  ?>
+                </th>
+              </tr>
+              <?php
+              }
+              ?>
+            </tbody>
+          </table>
+          <?php
+            $Total_AI = 0;
+            $True_AI = 0;
+            $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+            $s_sql = "SELECT * FROM ai_roc;";
+            $result = mysqli_query($conn, $s_sql);
+            while($row = mysqli_fetch_array($result)){
+              if($row["AI_test"]==0){
+                $True_AI++;
+              }
+              $Total_AI++;
+            }
+            echo "인식률 : ".round(($True_AI/$Total_AI)*100, 2);
+          ?>
+
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!--==========================
+  Services Section
+  ============================-->
+  <section id="services">
+    <div class="container wow fadeInUp">
+      <div class="row">
+        <div class="col-md-12">
+          <h3 class="section-title">기기상태 조회</h3>
+          <div class="section-title-divider"></div>
+          <p class="section-description">선택된 기기의 상태값 조회</p>
+            <form form class="" method='post' action="#services">
+            <div class="col-md-5 service-item">
+              <label for="Sel_DV">기기선택 :</label>
+              <select id="Sel_DV" name="Sel_DV">
+                <?php
+                $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+                $s_sql = "SELECT D_Code, DV_name FROM my_device where Add_DV = '1';";
+                $result = mysqli_query($conn, $s_sql);
+                while($row = mysqli_fetch_array($result)){
+                ?>
+                <option value= <?php print_r($row["D_Code"]); ?> ><?php print_r($row["D_Code"]); ?> : <?php print_r($row["DV_name"]); ?> </option>
+                <?php
+                }
+                ?>
+              </select>
+          </div>
+          <div class="col-md-2 service-item">
+            <button class="btn btn-large btn-primary" type="submit"
+              >데이터 조회</button>
+          </div>
+          </form>
+        </div>
+      </div>
+      <?php
+      $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+      $s_sql = "SELECT * FROM my_main";
+
+      if(isset($_POST['Sel_DV'])) {
+        $s_sql = "SELECT * FROM my_main where D_Code = ".$_POST['Sel_DV'];
+      }
+
+      $result = mysqli_query($conn, $s_sql);
+      while($row = mysqli_fetch_array($result)){
+        $My_SOC = $row["SOC"];
+        $My_Voltage = $row["Volt"];
+        $My_Current = $row["Curr"];
+        $TP_N1 = $row["Temp_N1"];
+        $TP_N2 = $row["Temp_N2"];
+        $TP_N3 = $row["Temp_N3"];
+        $TP_N4 = $row["Temp_N4"];
+        $TP_N5 = $row["Temp_N5"];
+        $TP_N6 = $row["Temp_N6"];
+        $TP_N7 = $row["Temp_N7"];
+        $TP_N8 = $row["Temp_NP"];
+        $This_time = $row["Cal_Date"];
+      }
+      ?>
+      <?php
+        if(isset($_POST['Sel_DV'])) {
+        $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+        $s_sql = "SELECT D_Code, DV_name FROM my_device where Add_DV = '1' and D_Code = ".$_POST['Sel_DV'].";";
+        $result = mysqli_query($conn, $s_sql);
+        while($row = mysqli_fetch_array($result)){
+          $This_Code = $row["D_Code"];
+          $This_Name = $row["DV_name"];
+        }
+        echo "조회 기기 - ".$This_Code." : ".$This_Name;
+      }
+      ?>
+      <br>
+      <?php
+        echo "최신 업데이트 날짜/시간 : " .$This_time;
+      ?>
+      <div class="row">
+        <div class="col-md-4 service-item">
+          <div class="service-icon"><i class="fa fa-desktop"></i></div>
+          <h4 class="service-title"><a href="">기기상태</a></h4>
+          <canvas id="chartcanvas" width="350" height="350"></canvas>
+
+          <script type="text/javascript">
+            var a = Number('<?php echo $My_SOC; ?>');
+            var b = 100-a;
+            XY_Chart(a, b);
+          </script>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>이름</th>
+                <th>값</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>SOC</th>
+                <th>
+                  <?php
+                  echo $My_SOC;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Voltage</th>
+                <th>
+                  <?php
+                  $My_Voltage = $My_Voltage*0.1;
+                  echo $My_Voltage;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Current</th>
+                <th>
+                  <?php
+                  $My_Current = $My_Current*0.1;
+                  echo $My_Current;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>온도센서1</th>
+                <th>
+                  <?php
+                  echo $TP_N1;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>온도센서2</th>
+                <th>
+                  <?php
+                  echo $TP_N2;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>온도센서3</th>
+                <th>
+                  <?php
+                  echo $TP_N3;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>온도센서4</th>
+                <th>
+                  <?php
+                  echo $TP_N4;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>온도센서5</th>
+                <th>
+                  <?php
+                  echo $TP_N5;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>온도센서6</th>
+                <th>
+                  <?php
+                  echo $TP_N6;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>온도센서7</th>
+                <th>
+                  <?php
+                  echo $TP_N7;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>방열판</th>
+                <th>
+                  <?php
+                  echo $TP_N8;
+                  ?>
+                </th>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <?php
+        $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+        $s_sql = "SELECT * FROM my_cells;";
+
+        if(isset($_POST['Sel_DV'])) {
+          $s_sql = "SELECT * FROM my_cells where D_Code = ".$_POST['Sel_DV'];
+        }
+        $result = mysqli_query($conn, $s_sql);
+        while($row = mysqli_fetch_array($result)){
+          $My_Volt1 = $row["Volt1"]*0.001;
+          $My_Volt2 = $row["Volt2"]*0.001;
+          $My_Volt3 = $row["Volt3"]*0.001;
+          $My_Volt4 = $row["Volt4"]*0.001;
+          $My_Volt5 = $row["Volt5"]*0.001;
+          $My_Volt6 = $row["Volt6"]*0.001;
+          $My_Volt7 = $row["Volt7"]*0.001;
+          $My_Volt8 = $row["Volt8"]*0.001;
+          $My_Volt9 = $row["Volt9"]*0.001;
+          $My_Volt10 = $row["Volt10"]*0.001;
+          $My_Volt11 = $row["Volt11"]*0.001;
+          $My_Volt12 = $row["Volt12"]*0.001;
+          $My_Volt13 = $row["Volt13"]*0.001;
+          $My_Volt14 = $row["Volt14"]*0.001;
+          $My_Volt15 = $row["Volt15"]*0.001;
+          $My_Volt16 = $row["Volt16"]*0.001;
+          $My_Volt17 = $row["Volt17"]*0.001;
+          $My_Volt18 = $row["Volt18"]*0.001;
+          $My_Volt19 = $row["Volt19"]*0.001;
+          $My_Volt20 = $row["Volt20"]*0.001;
+          $My_Volt21 = $row["Volt21"]*0.001;
+          $My_Volt22 = $row["Volt22"]*0.001;
+          $My_Volt23 = $row["Volt23"]*0.001;
+          $My_Volt24 = $row["Volt24"]*0.001;
+          $My_Volt25 = $row["Volt25"]*0.001;
+          $My_Volt26 = $row["Volt26"]*0.001;
+          $My_Volt27 = $row["Volt27"]*0.001;
+          $My_Volt28 = $row["Volt28"]*0.001;
+          $My_Volt29 = $row["Volt29"]*0.001;
+          $My_Volt30 = $row["Volt30"]*0.001;
+          $My_Volt31 = $row["Volt31"]*0.001;
+          $My_Volt32 = $row["Volt32"]*0.001;
+          $My_Volt33 = $row["Volt33"]*0.001;
+
+          $My_SOC1 = $row["SOC1"];
+          $My_SOC2 = $row["SOC2"];
+          $My_SOC3 = $row["SOC3"];
+          $My_SOC4 = $row["SOC4"];
+          $My_SOC5 = $row["SOC5"];
+          $My_SOC6 = $row["SOC6"];
+          $My_SOC7 = $row["SOC7"];
+          $My_SOC8 = $row["SOC8"];
+          $My_SOC9 = $row["SOC9"];
+          $My_SOC10 = $row["SOC10"];
+          $My_SOC11 = $row["SOC11"];
+          $My_SOC12 = $row["SOC12"];
+          $My_SOC13 = $row["SOC13"];
+          $My_SOC14 = $row["SOC14"];
+          $My_SOC15 = $row["SOC15"];
+          $My_SOC16 = $row["SOC16"];
+          $My_SOC17 = $row["SOC17"];
+          $My_SOC18 = $row["SOC18"];
+          $My_SOC19 = $row["SOC19"];
+          $My_SOC20 = $row["SOC20"];
+          $My_SOC21 = $row["SOC21"];
+          $My_SOC22 = $row["SOC22"];
+          $My_SOC23 = $row["SOC23"];
+          $My_SOC24 = $row["SOC24"];
+          $My_SOC25 = $row["SOC25"];
+          $My_SOC26 = $row["SOC26"];
+          $My_SOC27 = $row["SOC27"];
+          $My_SOC28 = $row["SOC28"];
+          $My_SOC29 = $row["SOC29"];
+          $My_SOC30 = $row["SOC30"];
+          $My_SOC31 = $row["SOC31"];
+          $My_SOC32 = $row["SOC32"];
+          $My_SOC33 = $row["SOC33"];
+        }
+        ?>
+        <div class="col-md-4 service-item">
+          <div class="service-icon"><i class="fa fa-desktop"></i></div>
+          <h4 class="service-title"><a href="">Cell Voltage</a></h4>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Cell_Voltage</th>
+                <th>값</th>
+                <th>Cell_Voltage</th>
+                <th>값</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>Cell_Volt1</th>
+                <th>
+                  <?php
+                  echo $My_Volt1;
+                  ?>
+                </th>
+                <th>Cell_Volt2</th>
+                <th>
+                  <?php
+                  echo $My_Volt2;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt3</th>
+                <th>
+                  <?php
+                  echo $My_Volt3;
+                  ?>
+                </th>
+                <th>Cell_Volt4</th>
+                <th>
+                  <?php
+                  echo $My_Volt4;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt5</th>
+                <th>
+                  <?php
+                  echo $My_Volt5;
+                  ?>
+                </th>
+                <th>Cell_Volt6</th>
+                <th>
+                  <?php
+                  echo $My_Volt6;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt7</th>
+                <th>
+                  <?php
+                  echo $My_Volt7;
+                  ?>
+                </th>
+                <th>Cell_Volt8</th>
+                <th>
+                  <?php
+                  echo $My_Volt8;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt9</th>
+                <th>
+                  <?php
+                  echo $My_Volt9;
+                  ?>
+                </th>
+                <th>Cell_Volt10</th>
+                <th>
+                  <?php
+                  echo $My_Volt10;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt11</th>
+                <th>
+                  <?php
+                  echo $My_Volt11;
+                  ?>
+                </th>
+                <th>Cell_Volt12</th>
+                <th>
+                  <?php
+                  echo $My_Volt12;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt13</th>
+                <th>
+                  <?php
+                  echo $My_Volt13;
+                  ?>
+                </th>
+                <th>Cell_Volt14</th>
+                <th>
+                  <?php
+                  echo $My_Volt14;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt15</th>
+                <th>
+                  <?php
+                  echo $My_Volt15;
+                  ?>
+                </th>
+                <th>Cell_Volt16</th>
+                <th>
+                  <?php
+                  echo $My_Volt16;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt17</th>
+                <th>
+                  <?php
+                  echo $My_Volt17;
+                  ?>
+                </th>
+                <th>Cell_Volt18</th>
+                <th>
+                  <?php
+                  echo $My_Volt18;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt19</th>
+                <th>
+                  <?php
+                  echo $My_Volt19;
+                  ?>
+                </th>
+                <th>Cell_Volt20</th>
+                <th>
+                  <?php
+                  echo $My_Volt20;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt21</th>
+                <th>
+                  <?php
+                  echo $My_Volt21;
+                  ?>
+                </th>
+                <th>Cell_Volt22</th>
+                <th>
+                  <?php
+                  echo $My_Volt22;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt23</th>
+                <th>
+                  <?php
+                  echo $My_Volt23;
+                  ?>
+                </th>
+                <th>Cell_Volt24</th>
+                <th>
+                  <?php
+                  echo $My_Volt24;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt25</th>
+                <th>
+                  <?php
+                  echo $My_Volt25;
+                  ?>
+                </th>
+                <th>Cell_Volt26</th>
+                <th>
+                  <?php
+                  echo $My_Volt26;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt27</th>
+                <th>
+                  <?php
+                  echo $My_Volt27;
+                  ?>
+                </th>
+                <th>Cell_Volt28</th>
+                <th>
+                  <?php
+                  echo $My_Volt28;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt29</th>
+                <th>
+                  <?php
+                  echo $My_Volt29;
+                  ?>
+                </th>
+                <th>Cell_Volt30</th>
+                <th>
+                  <?php
+                  echo $My_Volt30;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt31</th>
+                <th>
+                  <?php
+                  echo $My_Volt31;
+                  ?>
+                </th>
+                <th>Cell_Volt32</th>
+                <th>
+                  <?php
+                  echo $My_Volt32;
+                  ?>
+                </th>
+              </tr>
+              <tr>
+                <th>Cell_Volt33</th>
+                <th>
+                  <?php
+                  echo $My_Volt33;
+                  ?>
+                </th>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col-md-4 service-item">
+          <div class="service-icon"><i class="fa fa-desktop"></i></div>
+          <h4 class="service-title"><a href="">Cell SOC</a></h4>
+          <table class="table table-striped">
+      			<thead>
+      				<tr>
+      					<th>Cell_SOC</th>
+      					<th>값</th>
+      					<th>Cell_SOC</th>
+      					<th>값</th>
+      				</tr>
+      			</thead>
+      			<tbody>
+      				<tr>
+      					<th>Cell_SOC1</th>
+      					<th>
+      						<?php
+      						echo $My_SOC1;
+      						?>
+      					</th>
+      					<th>Cell_SOC2</th>
+      					<th>
+      						<?php
+      						echo $My_SOC2;
+      						?>
+      					</th>
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC3</th>
+      					<th>
+      						<?php
+      						echo $My_SOC3;
+      						?>
+      					</th>
+      					<th>Cell_SOC4</th>
+      					<th>
+      						<?php
+      						echo $My_SOC4;
+      						?>
+      					</th>
+
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC5</th>
+      					<th>
+      						<?php
+      						echo $My_SOC5;
+      						?>
+      					</th>
+      					<th>Cell_SOC6</th>
+      					<th>
+      						<?php
+      						echo $My_SOC6;
+      						?>
+      					</th>
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC7</th>
+      					<th>
+      						<?php
+      						echo $My_SOC7;
+      						?>
+      					</th>
+      					<th>Cell_SOC8</th>
+      					<th>
+      						<?php
+      						echo $My_SOC8;
+      						?>
+      					</th>
+
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC9</th>
+      					<th>
+      						<?php
+      						echo $My_SOC9;
+      						?>
+      					</th>
+      					<th>Cell_SOC10</th>
+      					<th>
+      						<?php
+      						echo $My_SOC10;
+      						?>
+      					</th>
+
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC11</th>
+      					<th>
+      						<?php
+      						echo $My_SOC11;
+      						?>
+      					</th>
+      					<th>Cell_SOC12</th>
+      					<th>
+      						<?php
+      						echo $My_SOC12;
+      						?>
+      					</th>
+
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC13</th>
+      					<th>
+      						<?php
+      						echo $My_SOC13;
+      						?>
+      					</th>
+      					<th>Cell_SOC14</th>
+      					<th>
+      						<?php
+      						echo $My_SOC14;
+      						?>
+      					</th>
+
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC15</th>
+      					<th>
+      						<?php
+      						echo $My_SOC15;
+      						?>
+      					</th>
+      					<th>Cell_SOC16</th>
+      					<th>
+      						<?php
+      						echo $My_SOC16;
+      						?>
+      					</th>
+
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC17</th>
+      					<th>
+      						<?php
+      						echo $My_SOC17;
+      						?>
+      					</th>
+      					<th>Cell_SOC18</th>
+      					<th>
+      						<?php
+      						echo $My_SOC18;
+      						?>
+      					</th>
+
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC19</th>
+      					<th>
+      						<?php
+      						echo $My_SOC19;
+      						?>
+      					</th>
+      					<th>Cell_SOC20</th>
+      					<th>
+      						<?php
+      						echo $My_SOC20;
+      						?>
+      					</th>
+
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC21</th>
+      					<th>
+      						<?php
+      						echo $My_SOC21;
+      						?>
+      					</th>
+      					<th>Cell_SOC22</th>
+      					<th>
+      						<?php
+      						echo $My_SOC22;
+      						?>
+      					</th>
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC23</th>
+      					<th>
+      						<?php
+      						echo $My_SOC23;
+      						?>
+      					</th>
+      					<th>Cell_SOC24</th>
+      					<th>
+      						<?php
+      						echo $My_SOC24;
+      						?>
+      					</th>
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC25</th>
+      					<th>
+      						<?php
+      						echo $My_SOC25;
+      						?>
+      					</th>
+      					<th>Cell_SOC26</th>
+      					<th>
+      						<?php
+      						echo $My_SOC26;
+      						?>
+      					</th>
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC27</th>
+      					<th>
+      						<?php
+      						echo $My_SOC27;
+      						?>
+      					</th>
+      					<th>Cell_SOC28</th>
+      					<th>
+      						<?php
+      						echo $My_SOC28;
+      						?>
+      					</th>
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC29</th>
+      					<th>
+      						<?php
+      						echo $My_SOC29;
+      						?>
+      					</th>
+      					<th>Cell_SOC30</th>
+      					<th>
+      						<?php
+      						echo $My_SOC30;
+      						?>
+      					</th>
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC31</th>
+      					<th>
+      						<?php
+      						echo $My_SOC31;
+      						?>
+      					</th>
+      					<th>Cell_SOC32</th>
+      					<th>
+      						<?php
+      						echo $My_SOC32;
+      						?>
+      					</th>
+      				</tr>
+      				<tr>
+      					<th>Cell_SOC33</th>
+      					<th>
+      						<?php
+      						echo $My_SOC33;
+      						?>
+      					</th>
+      				</tr>
+      			</tbody>
+      		</table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!--==========================
+  Subscrbe Section
+  ============================-->
+  <!--
+  <section id="subscribe">
+    <div class="container wow fadeInUp">
+      <div class="row">
+        <div class="col-md-8">
+          <h3 class="subscribe-title">Subscribe For Updates</h3>
+          <p class="subscribe-text">Join our 1000+ subscribers and get access to the latest tools, freebies, product announcements and much more!</p>
+        </div>
+        <div class="col-md-4 subscribe-btn-container">
+          <a class="subscribe-btn" href="#">Subscribe Now</a>
+        </div>
+      </div>
+    </div>
+  </section>
+-->
+  <!--==========================
+  Porfolio Section
+  ============================-->
+  <section id="portfolio">
+    <div class="container wow fadeInUp">
+      <div class="row">
+        <div class="col-md-12">
+          <h3 class="section-title">데이터뷰</h3>
+          <div class="section-title-divider"></div>
+          <p class="section-description"></p>
+        </div>
+        <form form class="" method='post' action="#portfolio">
+            <div class="col-md-5 service-item">
+              <label for="Sel_DV2">기기선택 :</label>
+              <select id="Sel_DV2" name="Sel_DV2">
+                <?php
+                $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+                $s_sql = "SELECT D_Code, DV_name FROM my_device where Add_DV = '1';";
+                $result = mysqli_query($conn, $s_sql);
+                while($row = mysqli_fetch_array($result)){
+                ?>
+                <option value= <?php print_r($row["D_Code"]); ?> ><?php print_r($row["D_Code"]); ?> : <?php print_r($row["DV_name"]); ?> </option>
+                <?php
+                }
+                ?>
+              </select>
+          </div>
+          <div class="col-md-5 service-item">
+            <label for="Sel_date2">날짜/시간 :</label>
+            <input type="date"  name="Sel_date2" value="2020-04-17">
+            <label for="times">시간 :</label>
+            <input id="times" name="times" type="number" value="17" min="00" max="23" name="Sel_date" value="time">
+          </div>
+          <div class="col-md-2 service-item">
+            <button class="btn btn-large btn-primary" type="submit"
+              >값 조회</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 service-item">
+
+          <table class="table table-striped">
+
+            <thead>
+              <tr>
+                <th>시간</th>
+                <th>Voltage</th>
+                <th>SOC</th>
+                <th>Current</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php
+                if(isset($_POST['Sel_DV2'])) {
+                $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+                $s_sql2 = "SELECT * FROM my_main where D_Code = ".$_POST['Sel_DV2']." and date_format(Cal_Date, '%Y') = ".substr($_POST['Sel_date2'], 0, 4)." and date_format(Cal_Date, '%m') = ".substr($_POST['Sel_date2'], 5, 2)." and date_format(Cal_Date, '%d') = ".substr($_POST['Sel_date2'], 8, 2)." and date_format(Cal_Date, '%H') = ".$_POST['times'].";";
+                $result = mysqli_query($conn, $s_sql2);
+                $check = mysqli_fetch_array($result);
+                if($check[0]!=""){
+                  while($row = mysqli_fetch_array($result)){
+              ?>
+              <tr>
+                <td><?php echo $row["Cal_Date"] ?></td>
+                <td><?php echo $row["Volt"]*0.1. "V" ?></td>
+                <td><?php echo $row["SOC"]. "%" ?></td>
+                <td><?php echo $row["Curr"] ?></td>
+              </tr>
+              <?php
+              }
+
+            }
+            else{
+              echo "기기코드 - ".$_POST['Sel_DV2']." ".$_POST['Sel_date2']." ".$_POST['times']."시에 전송된 값 없음";
+              }
+            }
+            ?>
+            </tbody>
+          </table>
+
+        </div>
+        <div class="col-md-8 service-item">
+
+
+          <!-- UI Object 가로 -->
+          <div class="h_graph">
+              <ul>
+                <?php
+                  if(isset($_POST['Sel_DV2'])) {
+                  $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+                  $s_sql2 = "SELECT * FROM my_main where D_Code = ".$_POST['Sel_DV2']." and date_format(Cal_Date, '%Y') = ".substr($_POST['Sel_date2'], 0, 4)." and date_format(Cal_Date, '%m') = ".substr($_POST['Sel_date2'], 5, 2)." and date_format(Cal_Date, '%d') = ".substr($_POST['Sel_date2'], 8, 2)." and date_format(Cal_Date, '%H') = ".$_POST['times'].";";
+                  $result = mysqli_query($conn, $s_sql2);
+                  $check = mysqli_fetch_array($result);
+                  if($check[0]!=""){
+                    $idx_ch = 1;
+                    while($row = mysqli_fetch_array($result)){
+                      if($idx_ch==1){
+
+
+                  ?>
+                  <li><?php echo $row["Cal_Date"] ?></li>
+                  <li><span class="g_term">SOC</span><span class="g_bar" style="width: <?php print_r($row["SOC"]); ?>%"><span><?php echo $row["SOC"] ?> %</span></span></li>
+                  <li><span class="g_term">VOltage</span><span class="g_bar2" style="width: <?php print_r($row["Volt"]*0.1); ?>%"><span><?php echo $row["Volt"]*0.1 ?> V</span></span></li>
+                  <?php
+                        $idx_ch++;
+                      }
+                      else{
+                        $idx_ch = 1;
+                      }
+                    }
+                  }
+                  else{
+                  echo "기기코드 - ".$_POST['Sel_DV2']." ".$_POST['Sel_date2']." ".$_POST['times']."시에 전송된 값 없음";
+                    }
+                  }
+                  ?>
+              </ul>
+          </div>
+          <!-- //UI Object -->
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!--==========================
+  Testimonials Section
+  ============================-->
+  <section id="testimonials">
+    <div class="container wow fadeInUp">
+      <div class="row">
+        <div class="col-md-12">
+          <h3 class="section-title">관리자 패널</h3>
+          <div class="section-title-divider"></div>
+          <p class="section-description">유저관리 및 기기관리</p>
+        </div>
+      </div>
+
+      <div class="row">
+
+        <div class="col-lg-6 AI_S-img">
+          <h3>유저관리</h3>
+          <form form class="" method='post' action="#testimonials">
+          <select class="" name="User_Sel">
+            <?PHP
+              $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+              $s_sql = "SELECT * FROM my_user";
+              $result = mysqli_query($conn, $s_sql);
+              while($row = mysqli_fetch_array($result)){
+            ?>
+              <option value= <?php print_r($row["idx"]); ?>><?php print_r($row["U_id"]); ?> : <?php print_r($row["U_nm"]); ?></option>
+            <?PHP
+              }
+            ?>
+          </select>
+          <button class="btn btn-large btn-primary" type="submit"
+            >유저 조회</button>
+
+          <br><br>
+          <?php
+          if(isset($_POST['User_Sel'])) {
+          $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+          $s_sql = "SELECT * FROM my_user where idx = ".$_POST['User_Sel'];
+          $result = mysqli_query($conn, $s_sql);
+            while($row = mysqli_fetch_array($result)){
+              $IDs = $row["U_id"];
+              $NAMEs = $row["U_nm"];
+              $Join_T = $row["joinus"];
+              $Last_T = $row["lastlogin"];
+              $auth = $row["auth"];
+            }
+          }
+          ?>
+          <h4>유저정보</h4>
+          <?PHP
+            if(isset($_POST['User_Sel'])) {
+          ?>
+          <table class="table table-striped">
+            <thead>
+              <th></th>
+              <th>내용</th>
+            </thead>
+            <tbody>
+              <tr>
+                <th>ID</th>
+                <td><?php echo $IDs ?></td>
+              </tr>
+              <tr>
+                <th>이름</th>
+                <td><?php echo $NAMEs ?></td>
+              </tr>
+              <tr>
+                <th>가입일</th>
+                <td><?php echo $Join_T ?></td>
+              </tr>
+              <tr>
+                <th>마지막접속일</th>
+                <td><?php echo $Last_T ?></td>
+              </tr>
+              <tr>
+                <th>권한</th>
+                <td><?php echo $auth ?></td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="btn btn-large btn-primary" type="submit"
+            >이름변경</button>
+          <button class="btn btn-large btn-primary" type="submit"
+            >권한변경</button>
+          <button class="btn btn-large btn-primary" type="submit"
+            >유저삭제</button>
+            <?PHP
+              }
+            ?>
+        </div>
+
+        <div class="col-lg-6 AI_S-img">
+          <h3>기기관리</h3>
+
+          <select class="" name="DV_Sel">
+            <?PHP
+              $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+              $s_sql = "SELECT * FROM my_device;";
+              $result = mysqli_query($conn, $s_sql);
+              while($row = mysqli_fetch_array($result)){
+            ?>
+              <option value= <?php print_r($row["D_Code"]); ?>><?php print_r($row["D_Code"]); ?> : <?php print_r($row["DV_name"]); ?></option>
+            <?PHP
+              }
+            ?>
+          </select>
+          <button class="btn btn-large btn-primary" type="submit"
+            >기기 조회</button>
+          </form>
+          <br><br>
+          <?php
+          if(isset($_POST['DV_Sel'])) {
+          $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+          $s_sql = "SELECT * FROM my_device where D_Code = ".$_POST['DV_Sel'];
+          $result = mysqli_query($conn, $s_sql);
+            while($row = mysqli_fetch_array($result)){
+              $Dcode = $row["D_Code"];
+              $DVname = $row["DV_name"];
+              $AddD = $row["Add_DV"];
+            }
+          }
+          ?>
+          <h4>기기정보</h4>
+          <?PHP
+            if(isset($_POST['DV_Sel'])) {
+          ?>
+          <table class="table table-striped">
+            <thead>
+              <th></th>
+              <th>내용</th>
+            </thead>
+            <tbody>
+              <tr>
+                <th>기기코드</th>
+                <td><?php echo $Dcode ?></td>
+
+              </tr>
+              <tr>
+                <th>기기이름</th>
+                <td><?php echo $DVname ?></td>
+
+              </tr>
+              <tr>
+                <th>추가상태</th>
+                <td><?php
+                  if($AddD==1){
+                    echo "추가";
+                  }
+                  else{
+                    echo "삭제";
+                  }
+                  ?></td>
+              </tr>
+
+              <tr>
+                <?PHP
+                if(isset($_POST['DV_Sel'])) {
+                $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+                $s_sql = "SELECT * FROM my_main where D_Code = ". $Dcode;
+                $result = mysqli_query($conn, $s_sql);
+                  while($row = mysqli_fetch_array($result)){
+                    $Last_DT = $row["Cal_Date"];
+                  }
+                }
+                ?>
+                <th>마지막데이터전송시간</th>
+                <td><?php echo $Last_DT ?></td>
+              </tr>
+              <tr>
+                <?PHP
+                if(isset($_POST['DV_Sel'])) {
+                $conn = mysqli_connect("127.0.0.1", "root", "dn1k0301", "test");
+                $s_sql = "SELECT COUNT(*) FROM my_main where D_Code = ". $Dcode;
+                $result = mysqli_query($conn, $s_sql);
+                  while($row = mysqli_fetch_array($result)){
+                    $Data_count = $row["COUNT(*)"];
+                  }
+                }
+                ?>
+                <th>전송된 데이터량</th>
+                <td><?php echo $Data_count ?></td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="btn btn-large btn-primary" type="submit"
+            >기기이름변경</button>
+          <button class="btn btn-large btn-primary" type="submit"
+            >기기추가삭제</button>
+            <?PHP
+              }
+            ?>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!--==========================
+  Team Section
+
+  <section id="team">
+    <div class="container wow fadeInUp">
+      <div class="row">
+        <div class="col-md-12">
+          <h3 class="section-title">Our Team</h3>
+          <div class="section-title-divider"></div>
+          <p class="section-description">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-3">
+          <div class="member">
+            <div class="pic"><img src="img/team-1.jpg" alt=""></div>
+            <h4>Walter White</h4>
+            <span>Chief Executive Officer</span>
+            <div class="social">
+              <a href=""><i class="fa fa-twitter"></i></a>
+              <a href=""><i class="fa fa-facebook"></i></a>
+              <a href=""><i class="fa fa-google-plus"></i></a>
+              <a href=""><i class="fa fa-linkedin"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="member">
+            <div class="pic"><img src="img/team-2.jpg" alt=""></div>
+            <h4>Sarah Jhinson</h4>
+            <span>Product Manager</span>
+            <div class="social">
+              <a href=""><i class="fa fa-twitter"></i></a>
+              <a href=""><i class="fa fa-facebook"></i></a>
+              <a href=""><i class="fa fa-google-plus"></i></a>
+              <a href=""><i class="fa fa-linkedin"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="member">
+            <div class="pic"><img src="img/team-3.jpg" alt=""></div>
+            <h4>William Anderson</h4>
+            <span>CTO</span>
+            <div class="social">
+              <a href=""><i class="fa fa-twitter"></i></a>
+              <a href=""><i class="fa fa-facebook"></i></a>
+              <a href=""><i class="fa fa-google-plus"></i></a>
+              <a href=""><i class="fa fa-linkedin"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="member">
+            <div class="pic"><img src="img/team-4.jpg" alt=""></div>
+            <h4>Amanda Jepson</h4>
+            <span>Accountant</span>
+            <div class="social">
+              <a href=""><i class="fa fa-twitter"></i></a>
+              <a href=""><i class="fa fa-facebook"></i></a>
+              <a href=""><i class="fa fa-google-plus"></i></a>
+              <a href=""><i class="fa fa-linkedin"></i></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  Contact Section
+
+  <section id="contact">
+    <div class="container wow fadeInUp">
+      <div class="row">
+        <div class="col-md-12">
+          <h3 class="section-title">Contact Us</h3>
+          <div class="section-title-divider"></div>
+          <p class="section-description">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-3 col-md-push-2">
+          <div class="info">
+            <div>
+              <i class="fa fa-map-marker"></i>
+              <p>A108 Adam Street<br>New York, NY 535022</p>
+            </div>
+
+            <div>
+              <i class="fa fa-envelope"></i>
+              <p>info@example.com</p>
+            </div>
+
+            <div>
+              <i class="fa fa-phone"></i>
+              <p>+1 5589 55488 55s</p>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="col-md-5 col-md-push-2">
+          <div class="form">
+            <div id="sendmessage">Your message has been sent. Thank you!</div>
+            <div id="errormessage"></div>
+            <form action="" method="post" role="form" class="contactForm">
+              <div class="form-group">
+                <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                <div class="validation"></div>
+              </div>
+              <div class="form-group">
+                <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" data-rule="email" data-msg="Please enter a valid email" />
+                <div class="validation"></div>
+              </div>
+              <div class="form-group">
+                <input type="text" class="form-control" name="subject" id="subject" placeholder="Subject" data-rule="minlen:4" data-msg="Please enter at least 8 chars of subject" />
+                <div class="validation"></div>
+              </div>
+              <div class="form-group">
+                <textarea class="form-control" name="message" rows="5" data-rule="required" data-msg="Please write something for us" placeholder="Message"></textarea>
+                <div class="validation"></div>
+              </div>
+              <div class="text-center"><button type="submit">Send Message</button></div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  Footer
+============================-->
+  <footer id="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="copyright">
+            &copy; Copyright <strong>Imperial Theme</strong>. All Rights Reserved
+          </div>
+          <div class="credits">
+            <!--
+              All the links in the footer should remain intact.
+              You can delete the links only if you purchased the pro version.
+              Licensing information: https://bootstrapmade.com/license/
+              Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/buy/?theme=Imperial
+            -->
+            Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <!-- #footer -->
+
+  <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
+
+  <!-- Required JavaScript Libraries -->
+  <script src="lib/jquery/jquery.min.js"></script>
+  <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+  <script src="lib/superfish/hoverIntent.js"></script>
+  <script src="lib/superfish/superfish.min.js"></script>
+  <script src="lib/morphext/morphext.min.js"></script>
+  <script src="lib/wow/wow.min.js"></script>
+  <script src="lib/stickyjs/sticky.js"></script>
+  <script src="lib/easing/easing.js"></script>
+
+  <!-- Template Specisifc Custom Javascript File -->
+  <script src="js/custom.js"></script>
+
+  <script src="contactform/contactform.js"></script>
+
+
 </body>
+
 </html>
